@@ -11,63 +11,10 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 ---
 
-## 2. Diagrama de arquitectura
+
+## 2. Entregable 1 — Mapa de arquitectura (20%)
 
 📄 [Ver diagrama de arquitectura](Diagrama/Arquitectura.pdf)
-
-1. Disparo: el estudio envía las novedades del mes por Telegram, en un solo mensaje de texto libre con todos los empleados.
-
-2. Extracción: un nodo de código separa ese mensaje en una novedad individual por empleado.
-
-3. Interpretación (Agente IA 1 — Claude): cada novedad se interpreta contra el catálogo de conceptos válidos cargado en Airtable (funciona como fuente RAG), determinando qué campos del legajo corresponde modificar y con qué valor.
-
-4. Decisión (¿Estado = ok?):
-
-Sí → el caso está completo y sin ambigüedad → se escribe automáticamente en Google Sheets (motor de cálculo con fórmulas) y queda registrado en el Log de Casos (Airtable).
-No → el caso requiere revisión humana (despido, alta de empleado, dato incompleto o concepto no reconocido) → entra al ciclo de aprobación.
-
-5. Ciclo de revisión humana (HITL):
-
-Loop Over Items toma los casos pendientes de a uno.
-El sistema envía un mensaje por Telegram explicando qué falta y espera la respuesta.
-La respuesta pasa por el Agente IA 2 (DeepSeek), que valida el formato, normaliza datos (fechas, texto) y confirma si el caso queda resuelto.
-¿Campos OK?
-Sí → se escribe en Sheets (actualiza si el empleado existe, agrega una fila nueva si es un alta) y el Log de Casos registra el resultado. El Loop pasa al siguiente caso pendiente.
-No → se vuelve a pedir el dato faltante para el mismo caso, sin avanzar a otro.
-
-6. Cierre: cuando ya no quedan casos pendientes, el Loop dispara un mensaje final de Telegram confirmando que la revisión terminó.
-
-7. Trazabilidad: cada intento — automático o manual, exitoso o no — queda registrado en el Log de Casos de Airtable, base del control de errores y del dashboard.
-
----
-
-## 3. Estructura del repositorio
-
-```
-/diagrama
-  arquitectura.pdf
-/json
-  workflow_n8n.json
-/screenshots
-  01_trigger_telegram.png
-  02_agente_ia_1_interpretacion.png
-  03_catalogo_airtable.png
-  04_flujo_completo_canvas.png
-  05_mensaje_hitl_telegram.png
-  06_respuesta_correccion.png
-  07_segundo_agente_validacion.png
-  08_escritura_google_sheets.png
-  09_log_casos_airtable.png
-  10_caso_alta_append_row.png
-README.md
-ANEXOS.md
-```
-
----
-
-## 4. Entregable 1 — Mapa de arquitectura (20%)
-
-Ver PDF en `/diagrama/arquitectura.pdf` (sección 2).
 
 **Resumen del flujo:**
 1. El estudio envía las novedades del mes por Telegram, en texto libre, para todos los empleados en un solo mensaje.
@@ -84,11 +31,11 @@ Ver PDF en `/diagrama/arquitectura.pdf` (sección 2).
 
 ---
 
-## 5. Entregable 2 — Estructuras de datos documentadas (20%)
+## 2. Entregable 2 — Estructuras de datos documentadas (20%)
 
 ### 5.1 Google Sheets — motor de cálculo
 
-| Hoja | Función |
+| Hoja 1| Captar todas las novedades relativas a cada empleado que forma parte de la nomina de la empresa |
 |---|---|
 | Datos Empresa | Datos fijos del empleador |
 | Escala/Convenio | Valores por categoría (básico, no remunerativo) según el acuerdo UTHGRA vigente |
@@ -96,7 +43,7 @@ Ver PDF en `/diagrama/arquitectura.pdf` (sección 2).
 
 **Regla de diseño clave:** la IA únicamente escribe en las columnas de "días" y datos estructurales de alta. Los campos de resultado (Neto, Bruto, Aportes, Contribuciones) siempre se calculan por fórmula — la IA nunca hace aritmética de montos.
 
-🔗 **[PEGAR AQUÍ: link de solo lectura al Google Sheets]**
+🔗 https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=sharing
 
 ### 5.2 Airtable — memoria y registro del sistema
 
