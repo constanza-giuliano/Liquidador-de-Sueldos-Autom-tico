@@ -218,4 +218,4 @@ Casos probados durante el desarrollo:
 
 ---
 
-Ver `ANEXOS.md` para el detalle completo de todos los prompts de IA y JSON de ejemplo utilizados durante el desarrollo.
+[Ver Anexos](ANEXOS) para el detalle completo de todos los prompts de IA y JSON de ejemplo utilizados durante el desarrollo.
