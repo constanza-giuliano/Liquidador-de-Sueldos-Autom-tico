@@ -1,0 +1,29 @@
+const items = $input.all();
+const output = [];
+
+for (const item of items) {
+  const text = item.json.message.text;
+  if (!text) continue;
+
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  const headerLine = lines[0];
+  const periodoMatch = headerLine.match(/Novedades\s+(.+?):?\s*$/i);
+  const periodo = periodoMatch ? periodoMatch[1].trim() : headerLine.replace(':', '').trim();
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    const empleadoMatch = line.match(/empleado\s+(\d+)\s+(.+)/i);
+
+    if (empleadoMatch) {
+      const legajo = empleadoMatch[1];
+      const texto_novedad = empleadoMatch[2].replace(/\.$/, '').trim();
+
+      const texto = `Periodo: ${periodo} | Legajo: ${legajo} | Novedad: ${texto_novedad}`;
+
+      output.push({ json: { texto } });
+    }
+  }
+}
+
+return output;
