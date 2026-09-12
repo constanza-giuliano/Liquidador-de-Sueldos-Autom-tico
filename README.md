@@ -197,9 +197,7 @@ Casos probados durante el desarrollo:
 - ✅ Corrección manual con opción de texto en minúsculas ("normal" en vez de "NORMAL") → normalizado automáticamente.
 - ⚠️ Se detectó y corrigió durante el desarrollo un bug de multiplicación de items en el loop HITL (documentado como aprendizaje del proyecto, ver ANEXOS.md).
 
-📸 **[PEGAR AQUÍ: capturas de al menos 5 ejecuciones distintas mostrando estos casos]**
-ANEXOS/Ejecuciones
-📄 [Ver ejemplos de distintos casos ejecutados](ANEXOS/Ejecuciones)
+📸  [Ver ejemplos de distintos casos ejecutados](ANEXOS/Ejecuciones)
 
 ---
 
