@@ -45,13 +45,23 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 🔗 https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=sharing
 
-### 5.2 Airtable — memoria y registro del sistema
+### 5.2 Airtable 
+#### Memoria y registro del sistema
 
-**Tabla "Conceptos de Convenio"** (catálogo cerrado, actúa como fuente RAG):
+**Tabla "Conceptos_liquidacion.xlsx"** (catálogo cerrado, actúa como fuente RAG):
 
-📋 **[PEGAR AQUÍ: JSON de ejemplo de un registro de esta tabla]**
+📋 JSON CORTO DE EJEMPLO:
+[
+  {
+    "Concepto": "Dias ART 10",
+    "Descripcion": "Primeros 10 Dias en los que no trabajo por tener licencia por accidente de trabajo. Comienza el dia 1 del accidente de trabajo y se extiende hasta maximo el dia numero 10 desde la fecha de inicio",
+    "Valor aceptado": "Numero entero del 0 al 10"
+  }]
 
-**Tabla "Log de Casos"** (registro de trazabilidad):
+
+🔗 https://airtable.com/appqY1jYtEzBGJRrb/shrAiUMsPblmUqziY
+
+#### Tabla "Log de Casos"** (registro de trazabilidad):
 
 | Campo | Descripción |
 |---|---|
@@ -59,13 +69,24 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 | Periodo | Mes liquidado |
 | Rama | Automática / HITL |
 | Estado | ok / requiere_revision / error |
-| Campos modificados | Detalle de qué se cambió |
+| Campos | Detalle de qué se cambió |
 | Observación | Motivo, si hubo revisión |
 | Texto original | Novedad tal cual se recibió |
 
-📋 **[PEGAR AQUÍ: JSON de ejemplo de un registro de Log de Casos, tanto un caso "ok" como uno "requiere_revision"]**
+📋 JSON CORTO DE EJEMPLO:
+[{
+    "Legajo": "00025",
+    "Periodo": "Agosto 2026",
+    "Rama": "Automática",
+    "Estado": "ok",
+    "Campo": "Dias Vacaciones",
+    "Observacion": "",
+    "Texto original": "tuvo vacaciones del 08/08 al 25/08",
+    "Intento": 1,
+    "Fecha": "9/12/2026 9:16pm"
+  }]
 
-🔗 **[PEGAR AQUÍ: link de solo lectura a la base de Airtable]**
+🔗 https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD
 
 ### 5.3 Esquemas JSON de las integraciones
 
