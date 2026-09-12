@@ -1,0 +1,55 @@
+const items = $input.all();
+const output = [];
+
+for (const item of items) {
+  let parsed;
+  try {
+    parsed = JSON.parse(item.json.output);
+  } catch (e) {
+    output.push({
+      json: {
+        legajo: null,
+        periodo: null,
+        campo: null,
+        valor: null,
+        estado: 'error_parseo',
+        observacion: 'No se pudo parsear el output de la IA como JSON',
+        texto_original: item.json.output
+      }
+    });
+    continue;
+  }
+
+  const { legajo, periodo, texto_original, estado, motivo_revision, campos_modificados } = parsed;
+
+  if (estado === 'requiere_revision') {
+    output.push({
+      json: {
+        legajo,
+        periodo,
+        campo: null,
+        valor: null,
+        estado: 'requiere_revision',
+        observacion: motivo_revision,
+        texto_original
+      }
+    });
+    continue;
+  }
+
+  for (const campo of campos_modificados || []) {
+    output.push({
+      json: {
+        legajo,
+        periodo,
+        campo: campo.campo,
+        valor: campo.valor,
+        estado: 'ok',
+        observacion: '',
+        texto_original
+      }
+    });
+  }
+}
+
+return output;
