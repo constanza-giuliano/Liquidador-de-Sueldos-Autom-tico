@@ -170,7 +170,7 @@ El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de
 
 El ciclo de revisión humana (Loop Over Items) procesa un caso a la vez, y solo devuelve el control al loop principal cuando el caso queda resuelto (estado "ok"); un caso no resuelto vuelve únicamente al paso de reenvío de mensaje, sin re-ingresar como ítem nuevo del loop — evitando la multiplicación de tareas pendientes.
 
-⚠️ **Pendiente de reforzar antes de un uso productivo real:** agregar un contador explícito de intentos por caso (ej. máximo 3 reintentos), que corte el ciclo y derive el caso a revisión manual fuera del sistema si se supera el límite — mitigación adicional más allá del comportamiento actual.
+Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos), que corte el ciclo y derive el caso a revisión manual fuera del sistema si se supera el límite — mitigación adicional más allá del comportamiento actual.
 
 ### 7.4 Puntos de Human-in-the-loop (HITL)
 
@@ -204,16 +204,9 @@ Casos probados durante el desarrollo:
 
 ---
 
-## 10. Trabajo pendiente / próximos pasos
+## 10. Trabajo Futuro / próximos pasos
 
-Estas mejoras quedan identificadas y planificadas, pero no implementadas por restricción de tiempo de entrega:
-
-1. **Dashboard de control (Airtable Interface)**: armar los gráficos de KPIs y publicar el link.
-2. **Contador de intentos explícito** en el loop HITL, como capa adicional de seguridad anti-bucle (ver 7.3).
-3. **Sub-workflow de mantenimiento de Google Sheets**: un flujo separado para (a) limpiar/resetear las columnas de días de la hoja "Empleados" al inicio de cada nuevo período de liquidación, y (b) actualizar la hoja "Escala/Convenio" cuando cambie el acuerdo paritario, sin tener que hacerlo a mano. Quedó fuera de esta entrega por alcance y tiempo, pensado como la siguiente iteración del proyecto.
-4. **Corrección de mapeo de campos en el nodo Airtable de logging** (error puntual de nombre de columna detectado en las últimas pruebas, pendiente de resolver antes de considerar el logging 100% estable).
-5. **Video demo** de 3 minutos mostrando trigger, procesamiento y resultado (con credenciales ocultas).
-6. **Verificación final de nombres de columna** entre el catálogo de Airtable y los encabezados reales de Google Sheets, para los campos con asterisco (*Dias SAC Prop, *Dias Vac NG Prop).
+**Sub-workflow de mantenimiento de Google Sheets**: un flujo separado para (a) limpiar/resetear las columnas de días de la hoja "Empleados" al inicio de cada nuevo período de liquidación, y (b) actualizar la hoja "Escala/Convenio" cuando cambie el acuerdo paritario, sin tener que hacerlo a mano. Quedó fuera de esta entrega por alcance y tiempo, pensado como la siguiente iteración del proyecto.
 
 ---
 
