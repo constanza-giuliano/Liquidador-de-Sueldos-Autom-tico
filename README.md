@@ -198,6 +198,8 @@ Casos probados durante el desarrollo:
 - ⚠️ Se detectó y corrigió durante el desarrollo un bug de multiplicación de items en el loop HITL (documentado como aprendizaje del proyecto, ver ANEXOS.md).
 
 📸 **[PEGAR AQUÍ: capturas de al menos 5 ejecuciones distintas mostrando estos casos]**
+ANEXOS/Ejecuciones
+📄 [Ver ejemplos de distintos casos ejecutados](ANEXOS/Ejecuciones)
 
 ---
 
