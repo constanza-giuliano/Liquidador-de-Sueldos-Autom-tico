@@ -182,10 +182,7 @@ Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos)
 
 ## 8. Entregable 5 — Dashboard de control (20%)
 
-🔗 **[PEGAR AQUÍ: link público a la Airtable Interface / Shared View con KPIs]**
-
-⚠️ **Estado: pendiente de completar.** La tabla "Log de Casos" ya registra cada intento (automático y manual) con su estado, lista para alimentar el dashboard. Falta armar la Interface de Airtable con los gráficos de KPIs (casos ok vs. requiere_revision, tasa de resolución automática vs. manual) y publicarla como vista compartida. Ver sección 10 (pendientes).
-
+🔗 **[link/ Shared View con KPIs]**
 ---
 
 ## 9. Test de estrés y camino infeliz
@@ -217,7 +214,7 @@ Casos probados durante el desarrollo:
 
 ## 12. Video demo
 
-🎥 **[PEGAR AQUÍ: link al video de 3 minutos]**
+🎥
 
 ---
 
