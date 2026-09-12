@@ -209,7 +209,8 @@ Casos probados durante el desarrollo:
 
 ## 11. JSON del flujo de n8n
 
-📋 [Ver JSON completo del workflow](ANEXOS/Json%20completo%20n8n.txt)
+📋  [Ver JSON completo del workflow](ANEXOS/Json%20completo%20n8n.txt)
+
 ---
 
 ## 12. Video demo
