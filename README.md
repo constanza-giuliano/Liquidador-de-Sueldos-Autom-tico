@@ -7,7 +7,7 @@ Sistema de automatización que interpreta novedades mensuales de liquidación de
 
 ## 1. Caso de uso
 
-Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un cliente con ~150 empleados bajo un único convenio. Actualmente el proceso de traducir novedades (vacaciones, licencias, ART, altas, bajas) a la planilla de cálculo se hace a mano. Este sistema automatiza esa traducción, dejando solo la aprobación humana en los puntos de mayor riesgo (despidos, altas, datos ambiguos).
+Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un cliente con 117 empleados bajo un único convenio. Actualmente el proceso de traducir novedades (vacaciones, licencias, ART, altas, bajas) a la planilla de cálculo se hace a mano. Este sistema automatiza esa traducción, dejando solo la aprobación humana en los puntos de mayor riesgo (despidos, altas, datos ambiguos).
 
 ---
 
