@@ -1,0 +1,1692 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Rol: Interpretás novedades de liquidación de sueldos y determinás qué campos del legajo corresponde modificar. No calculás montos, solo indicás campo + valor.\n\nRecibís:\n- CATALOGO_CONCEPTOS: campos válidos, cada uno con \"concepto\", \"valor_aceptado\" y \"descripcion\".\n- NOVEDAD: objeto con \"periodo\", \"legajo\" y \"texto_novedad\".\n\nReglas generales:\n1. Podés modificar cualquier campo del catálogo cuya descripción coincida con la novedad (días de licencias, JORNADA, CAT, etc.).\n2 Los campos con asterisco (*Dias SAC Prop, *Dias Vac NG Prop) solo aplican en liquidación final (renuncia, despido, fin de período de prueba).\n\nLicencias por ART:\n- El sistema liquida sobre mes de 30 días. \"Dias ART 10\" son los primeros 10 días desde el inicio del accidente; \"Dias ART POST\" es del día 11 en adelante, hasta el día 30 o hasta que termine la licencia (lo que sea antes).\n- Si la licencia \"continúa\" sin fecha de fin, asumí que llega hasta el día 30 del mes y calculá ambos campos en consecuencia.\n\nDías Trabajados:\n- Siempre que modifiques alguno de estos campos: Dias ART 10, Dias ART POST, Dias Vacaciones, Dias Justificadas, Dias Injustificadas, Dias Maternidad — recalculá también \"Dias Trabajados\" como: 30 menos la suma de todos esos campos que apliquen ese mes para ese empleado.\n\nCasos que SIEMPRE van a revisión humana:\n- Finalización del contrato laboral: si el texto menciona un despido, cese decidido por el empleador, desvinculación no solicitada por el empleado o renuncia, marcá \"estado\": \"requiere_revision\" y \"motivo_revision\": \"Desvinculación detectada, requiere validación humana antes de liquidar\". No generes ningún campo en \"campos_modificados\" para este caso.\n- Altas de empleados nuevos: si el texto describe el ingreso de una persona que no figura en los datos del empleado (por ejemplo, \"nuevo ingreso\", \"se incorpora\", \"alta de personal\"), marcá \"estado\": \"requiere_revision\" y \"motivo_revision\": \"Alta de empleado nuevo, requiere carga manual de datos estructurales antes de procesar: Legajo, Nombre, Categoria, Jornada, FI, Sit.Contrib, Dias trabajados\". No generes ningún campo en \"campos_modificados\".\n- Si algún campo queda con \"valor_incompleto\" (dato faltante, licencia sin fecha de fin fuera de la regla de ART), marcá igualmente \"estado_caso\": \"requiere_revision\" con el motivo correspondiente.\n- Si ningún concepto del catálogo se ajusta al texto, marcá \"estado\": \"requiere_revision\", motivo_revision explicando que no se reconoció el concepto, y dejá \"campos_modificados\" vacío.\n- Si todos los campos se resolvieron bien, marcá \"estado\": \"ok\".\n\nOtras reglas:\n- No asumas información que no esté en el texto.\n\nDevolvé ÚNICAMENTE este JSON, sin texto adicional:\n\n{\n  \"legajo\": \"\",\n  \"periodo\": \"\",\n  \"texto_original\": \"\",\n  \"estado\": \"ok\" | \"requiere_revision\",\n  \"motivo_revision\": \"\",\n  \"campos_modificados\": [\n    { \"campo\": \"\", \"valor\": \"\" }\n  ]\n}\n\n-------------------------------------------------------------------------------------------------------------------------------------------\n\nCATALOGO_CONCEPTOS:\n{{ $json.catalogo }}\n\nNOVEDAD:\n{{ $json.texto }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        64,
+        -16
+      ],
+      "id": "13794c19-367a-4e63-aac8-268fef8db47a",
+      "name": "AI Agent",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4-flash",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        64,
+        128
+      ],
+      "id": "f6ceb3b6-c2b9-4d8b-89c9-2fdfe33825f3",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "k3gBsTlDhY98mtIL",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "eeba8acc-b1cd-4b3f-a4a6-8c4fb583da14",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2e2965fb-44a8-4e77-a0b0-db90dbe717bc",
+              "leftValue": "={{ $json.estado }}",
+              "rightValue": "ok",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        512,
+        -16
+      ],
+      "id": "d160c123-7ecc-4fe3-896b-afd53851577a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $json.chat_id }}",
+        "message": "={{ $json.mensaje }}",
+        "responseType": "freeText",
+        "options": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1296,
+        96
+      ],
+      "id": "70120948-0cd9-4ad1-900c-72e042e4b42a",
+      "name": "Send message and wait for response",
+      "webhookId": "3e1e8870-e153-4348-8d81-e39761cb7ba7",
+      "credentials": {
+        "telegramApi": {
+          "id": "gOrZznynPIAef9m8",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Rol: Validás respuestas de aprobación humana antes de escribirse en el sistema de sueldos.\n\nRecibís:\n- CATALOGO_CONCEPTOS: campos válidos con su formato aceptado.\n- LEGAJO: el legajo al que aplican los cambios.\n- PARES: lista de objetos {campo, valor} que un humano escribió a mano.\n- OBSERVACION: contexto que dio origen al caso analizado (novedad).\n\nPara cada par:\n1. Buscá el campo correspondiente en el catálogo, aunque el humano lo haya escrito con minúsculas, tildes distintas o espacios. Si encontrás una coincidencia razonable, normalizá el nombre al que figura exacto en el catálogo.\n2. Validá que el valor respete el formato aceptado para ese campo.\n3. Si el campo no existe en el catálogo o el valor no respeta el formato, marcá ese par como error.\n\nDetección de altas:\n- Si el conjunto de PARES corresponde al ingreso de un empleado nuevo (por ejemplo, si la novedad original mencionaba un alta o incorporación, o si los pares incluyen datos estructurales como NOMBRE, CAT, JORNADA, FI, Sit.Contrib, dias trabajados de una sola vez), marcá \"es_alta\": true.\n- Los campos obligatorios para un alta son: Legajo, NOMBRE, CAT, JORNADA, FI, Sit.Contrib, Dias trabajados.\n- Si es alta y todos los obligatorios están presentes y válidos, marcá cada uno con estado \"ok\".\n- Si es alta y falta algún campo obligatorio, incluí igualmente \"es_alta\": true, y agregá un resultado por cada campo faltante con \"estado\": \"valor_incompleto\" y \"observacion\": \"Falta dato obligatorio para dar de alta al empleado\".\n- Si no es un alta (es una corrección normal sobre un empleado existente), marcá \"es_alta\": false.\nNormalización antes de validar:\n- Fechas (campo FI): aceptá cualquier formato razonable (17/08/2026, 17-08-2026, etc.) y convertilo vos mismo a dd-mm-aaaa. Marcá error solo si la fecha es imposible o ambigua.\n- Campos con opciones fijas: ignorá mayúsculas/minúsculas y tildes, y normalizá al valor exacto del catálogo si hay coincidencia clara (ej: \"normal\" → \"NORMAL\"). Marcá error solo si no matchea ninguna opción.\n\n\nDevolvé ÚNICAMENTE este JSON, sin texto adicional:\n\n{\n  \"legajo\": \"\",\n  \"es_alta\": true/false,\n  \"resultados\": [\n    { \"campo\": \"\", \"valor\": \"\", \"estado\": \"ok\" | \"error\" | \"valor_incompleto\", \"observacion\": \"\" }\n  ]\n}\nCATALOGO_CONCEPTOS:\n{{ $('estructura conceptos').first().json.catalogo }}\nLEGAJO: {{ $json.legajo }}\nPARES: {{ JSON.stringify($json.pares) }}\nOBSERVACION: {{ $json.contexto_original }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1600,
+        80
+      ],
+      "id": "3c4933a7-6e78-4102-95eb-15ee5b6abe14",
+      "name": "AI Agent1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        272
+      ],
+      "id": "490281d1-b8c8-4ec9-aa22-194aea2d174b",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "k3gBsTlDhY98mtIL",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        896,
+        0
+      ],
+      "id": "e8341627-5108-4ef7-af3f-2895ae49b91a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "chatIds": "6734452331"
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -704,
+        -32
+      ],
+      "id": "b3c98866-f98c-4564-9eeb-32d65ca4c63c",
+      "name": "Mensaje Novedades",
+      "webhookId": "b5aeda0b-3b9c-4692-87bd-2a4960cb6a4f",
+      "credentials": {
+        "telegramApi": {
+          "id": "gOrZznynPIAef9m8",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  const text = item.json.message.text;\n  if (!text) continue;\n\n  const lines = text.split('\\n').map(l => l.trim()).filter(l => l.length > 0);\n\n  const headerLine = lines[0];\n  const periodoMatch = headerLine.match(/Novedades\\s+(.+?):?\\s*$/i);\n  const periodo = periodoMatch ? periodoMatch[1].trim() : headerLine.replace(':', '').trim();\n\n  for (let i = 1; i < lines.length; i++) {\n    const line = lines[i];\n    const empleadoMatch = line.match(/empleado\\s+(\\d+)\\s+(.+)/i);\n\n    if (empleadoMatch) {\n      const legajo = empleadoMatch[1];\n      const texto_novedad = empleadoMatch[2].replace(/\\.$/, '').trim();\n\n      const texto = `Periodo: ${periodo} | Legajo: ${legajo} | Novedad: ${texto_novedad}`;\n\n      output.push({ json: { texto } });\n    }\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        64
+      ],
+      "id": "39978e58-6e88-4a5c-b361-830fe02ff024",
+      "name": "Estructurar novedades"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appqY1jYtEzBGJRrb",
+          "mode": "list",
+          "cachedResultName": "Conceptos_liquidacion.xlsx",
+          "cachedResultUrl": "https://airtable.com/appqY1jYtEzBGJRrb"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblq9zuR9D4L8DVnB",
+          "mode": "list",
+          "cachedResultName": "Hoja1",
+          "cachedResultUrl": "https://airtable.com/appqY1jYtEzBGJRrb/tblq9zuR9D4L8DVnB"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        -496,
+        -128
+      ],
+      "id": "fff071f9-bbb6-4e6d-b2bc-b26569ed9bbe",
+      "name": "Conceptos de liquidacion",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "fxC6KwjP0wOnXVUi",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst seen = new Set();\nconst catalogo = [];\n\nfor (const item of items) {\n  const f = item.json.fields;\n  const id = item.json.id;\n\n  if (seen.has(id)) continue;\n  seen.add(id);\n\n  const texto = `${f['Concepto']}: ${f['Descripcion']} (Valor aceptado: ${f['Valor aceptado']})`;\n  catalogo.push(texto);\n}\n\nreturn [{ json: { catalogo: catalogo.join('\\n') } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -352,
+        -128
+      ],
+      "id": "1766c1ed-348f-4479-8104-805efebdc9a8",
+      "name": "estructura conceptos"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst catalogoItem = items.find(i => i.json.catalogo !== undefined);\nconst novedades = items.filter(i => i.json.texto !== undefined);\n\nconst catalogo = catalogoItem ? catalogoItem.json.catalogo : '';\n\nreturn novedades.map(n => ({\n  json: {\n    catalogo,\n    texto: n.json.texto\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "e0508eba-2d29-4899-bdf3-e999d38e88eb",
+      "name": "conceptos_novedades"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  let parsed;\n  try {\n    parsed = JSON.parse(item.json.output);\n  } catch (e) {\n    output.push({\n      json: {\n        legajo: null,\n        periodo: null,\n        campo: null,\n        valor: null,\n        estado: 'error_parseo',\n        observacion: 'No se pudo parsear el output de la IA como JSON',\n        texto_original: item.json.output\n      }\n    });\n    continue;\n  }\n\n  const { legajo, periodo, texto_original, estado, motivo_revision, campos_modificados } = parsed;\n\n  if (estado === 'requiere_revision') {\n    output.push({\n      json: {\n        legajo,\n        periodo,\n        campo: null,\n        valor: null,\n        estado: 'requiere_revision',\n        observacion: motivo_revision,\n        texto_original\n      }\n    });\n    continue;\n  }\n\n  for (const campo of campos_modificados || []) {\n    output.push({\n      json: {\n        legajo,\n        periodo,\n        campo: campo.campo,\n        valor: campo.valor,\n        estado: 'ok',\n        observacion: '',\n        texto_original\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "caff7935-6cb0-4064-a4e8-09a8e77d2372",
+      "name": "Estructura_IA"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst catalogoCorto = $('estructura conceptos').first().json.catalogo\n  .split('\\n')\n  .map(line => line.split(':')[0])\n  .join(', ');\n\nconst porLegajo = {};\nfor (const item of items) {\n  const { legajo, texto_original, observacion, campo, es_alta } = item.json;\n  if (!porLegajo[legajo]) {\n    porLegajo[legajo] = { legajo, texto_original, es_alta: false, camposFaltantes: [], motivos: [] };\n  }\n  if (es_alta) porLegajo[legajo].es_alta = true;\n  if (campo) porLegajo[legajo].camposFaltantes.push(campo);\n  if (observacion) porLegajo[legajo].motivos.push(observacion);\n}\n\nreturn Object.values(porLegajo).map(caso => {\n  let instrucciones;\n\n  if (caso.es_alta) {\n    instrucciones = `Es un ALTA de empleado nuevo. Para completarla, necesito SÍ O SÍ estos datos: ${caso.camposFaltantes.join(', ')}`;\n  } else {\n    instrucciones = `Columnas disponibles: ${catalogoCorto}`;\n  }\n\n  const mensaje = `⚠️ Caso requiere revisión\n\nLegajo: ${caso.legajo}\nNovedad original: \"${caso.texto_original}\"\nMotivos pendientes:\n${caso.motivos.map(m => `- ${m}`).join('\\n')}\n\n${instrucciones}\n\nPara aprobar, respondé con este formato:\nLEGAJO, COLUMNA, VALOR; COLUMNA, VALOR\n\nEjemplo: 00025, Dias ART POST, 15; Dias Vacaciones, 5`;\n\n  return { json: { legajo: caso.legajo, mensaje, chat_id: 6734452331 } };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "e4e321ae-1222-4c3d-9f40-68c864b04e6c",
+      "name": "mensaje_revision"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const row = { Legajo: item.json.legajo };\n\n  if (Array.isArray(item.json.campos)) {\n    // Viene de la rama de corrección (agrupado en Code10)\n    for (const c of item.json.campos) {\n      row[c.campo] = c.valor;\n    }\n  } else if (item.json.campo) {\n    // Viene de la rama automática (un campo por item)\n    row[item.json.campo] = item.json.valor;\n  }\n\n  row[\"Novedades\"] = item.json.texto_original || \"\";\n  row[\"Revisada por IA\"] = \"Sí\";\n\n  return { json: row };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        -256
+      ],
+      "id": "afbc6c2a-e426-46bd-81e5-464001940733",
+      "name": "estructura_excel"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig",
+          "mode": "list",
+          "cachedResultName": "Prueba make",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 739429926,
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit#gid=739429926"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "row_number": 0
+          },
+          "matchingColumns": [
+            "Legajo"
+          ],
+          "schema": [
+            {
+              "id": "Legajo",
+              "displayName": "Legajo",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "NOMBRE",
+              "displayName": "NOMBRE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CCT",
+              "displayName": "CCT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sit.Contrib",
+              "displayName": "Sit.Contrib",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "CAT",
+              "displayName": "CAT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "JORNADA",
+              "displayName": "JORNADA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Basico",
+              "displayName": "Basico",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FI",
+              "displayName": "FI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Años Antigüedad",
+              "displayName": "Años Antigüedad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Antigüedad % Uthgra",
+              "displayName": "Antigüedad % Uthgra",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Liquidacion",
+              "displayName": "Liquidacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Novedades mes anterior",
+              "displayName": "Novedades mes anterior",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Novedades",
+              "displayName": "Novedades",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias Trabajados",
+              "displayName": "Dias Trabajados",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias ART 10",
+              "displayName": "Dias ART 10",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias ART POST",
+              "displayName": "Dias ART POST",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias Vacaciones",
+              "displayName": "Dias Vacaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias Justificadas",
+              "displayName": "Dias Justificadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias Injustificadas",
+              "displayName": "Dias Injustificadas",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias Maternidad",
+              "displayName": "Dias Maternidad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "*Dias SAC Prop",
+              "displayName": "*Dias SAC Prop",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "*Dias Vac NG Prop",
+              "displayName": "*Dias Vac NG Prop",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Dias Totales",
+              "displayName": "Dias Totales",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        -256
+      ],
+      "id": "948b7358-db9a-4333-9e27-363a9200709f",
+      "name": "Actualizar_excel",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Q4K9Hho7XcegBS7a",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Junta todos los items que llegan (los N campos de UN caso) en un solo item\nconst items = $input.all();\n\nreturn [{\n  json: {\n    legajo: items[0].json.legajo || items[0].json.Legajo,\n    campos_actualizados: items.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        -80
+      ],
+      "id": "5dd1837b-2aaf-4a22-bbb0-69d0232a83e4",
+      "name": "Estructura_mensaje_final"
+    },
+    {
+      "parameters": {
+        "chatId": "=6734452331",
+        "text": "=\t✅ Revisión de casos manuales completada. Todas las novedades del mes fueron procesadas.",
+        "additionalFields": {
+          "appendAttribution": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1328,
+        -64
+      ],
+      "id": "a08a920d-0905-4597-85b9-c206a41c804c",
+      "name": "Aviso_revisiones_ok",
+      "webhookId": "0bf8123a-cf50-4b5a-97e7-d0ba9a605d53",
+      "credentials": {
+        "telegramApi": {
+          "id": "gOrZznynPIAef9m8",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const intentoActual = (item.json.intento || 0) + 1;\n  return {\n    json: {\n      ...item.json,\n      intento: intentoActual\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        96
+      ],
+      "id": "4b6b7259-1d18-42f1-a1d2-9b3ff67c36de",
+      "name": "Estructura_1_1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst output = [];\nconst casosOriginales = $('mensaje_revision').all();\n\nfor (const item of items) {\n  const text = item.json.data.text;\n\n  const usaPipe = text.includes('|');\n  let legajo, pares;\n\n  if (usaPipe) {\n    const partes = text.split('|').map(p => p.trim());\n    legajo = partes[0];\n    pares = [];\n    for (let i = 1; i < partes.length; i += 2) {\n      if (partes[i + 1] !== undefined) pares.push({ campo: partes[i], valor: partes[i + 1] });\n    }\n  } else {\n    const grupos = text.split(';').map(g => g.trim());\n    const primerGrupo = grupos[0].split(',').map(p => p.trim());\n    legajo = primerGrupo[0];\n    pares = primerGrupo.length >= 3 ? [{ campo: primerGrupo[1], valor: primerGrupo[2] }] : [];\n\n    for (let i = 1; i < grupos.length; i++) {\n      const partes = grupos[i].split(',').map(p => p.trim());\n      if (partes.length === 2) pares.push({ campo: partes[0], valor: partes[1] });\n    }\n  }\n\n  const casoOriginal = casosOriginales.find(c => c.json.legajo === legajo);\n  const contexto = casoOriginal ? casoOriginal.json.mensaje : '';\n\n  output.push({\n    json: { legajo, pares, texto_original: text, contexto_original: contexto }\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        96
+      ],
+      "id": "3ce576b2-cd82-47dd-9c28-4952910d588d",
+      "name": "estructura_respuesta"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst output = [];\n\nfor (const item of items) {\n  const parsed = JSON.parse(item.json.output);\n  const { legajo, es_alta, resultados } = parsed;\n\n  for (const r of resultados) {\n    output.push({\n      json: {\n        legajo,\n        es_alta,\n        campo: r.campo,\n        valor: r.valor,\n        estado: r.estado,\n        observacion: r.observacion\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1872,
+        80
+      ],
+      "id": "0a8d9ae0-1929-4eaf-9d62-ba2d90f383cc",
+      "name": "estructura_ia_2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst legajo = items[0].json.legajo;\nconst es_alta = items[0].json.es_alta;\nconst todosOk = items.every(i => i.json.estado === 'ok');\n\nreturn [{\n  json: {\n    legajo,\n    es_alta,\n    estado: todosOk ? 'ok' : 'error',\n    campos: items.map(i => ({\n      campo: i.json.campo,\n      valor: i.json.valor,\n      estado: i.json.estado,\n      observacion: i.json.observacion\n    }))\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        80
+      ],
+      "id": "41c9e19a-2c8d-448c-a721-e6a81a6931f4",
+      "name": "estructura_final_ok"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app4ap36WRIaXrZn3",
+          "mode": "list",
+          "cachedResultName": "Casos",
+          "cachedResultUrl": "https://airtable.com/app4ap36WRIaXrZn3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblx5eOEhra2thl3G",
+          "mode": "list",
+          "cachedResultName": "Log de Casos",
+          "cachedResultUrl": "https://airtable.com/app4ap36WRIaXrZn3/tblx5eOEhra2thl3G"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Legajo": "={{ $json.legajo }}",
+            "Periodo": "={{ $json.periodo }}",
+            "Estado": "={{ $json.estado }}",
+            "Observacion": "={{ $json.observacion }}",
+            "Texto original": "={{ $json.texto_original }}",
+            "Rama": "Automática",
+            "Campo": "={{ $json.campo }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Legajo",
+              "displayName": "Legajo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Periodo",
+              "displayName": "Periodo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Rama",
+              "displayName": "Rama",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Automática",
+                  "value": "Automática"
+                },
+                {
+                  "name": "HITL",
+                  "value": "HITL"
+                },
+                {
+                  "name": "Vida",
+                  "value": "Vida"
+                },
+                {
+                  "name": "Automotor",
+                  "value": "Automotor"
+                },
+                {
+                  "name": "ART",
+                  "value": "ART"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ok",
+                  "value": "ok"
+                },
+                {
+                  "name": "requiere_revision",
+                  "value": "requiere_revision"
+                },
+                {
+                  "name": "error",
+                  "value": "error"
+                },
+                {
+                  "name": "Abierto",
+                  "value": "Abierto"
+                },
+                {
+                  "name": "Cerrado",
+                  "value": "Cerrado"
+                },
+                {
+                  "name": "En revisión",
+                  "value": "En revisión"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Campo",
+              "displayName": "Campo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Observacion",
+              "displayName": "Observacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Texto original",
+              "displayName": "Texto original",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intento",
+              "displayName": "Intento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Período-Mes",
+              "displayName": "Período-Mes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fuente de datos",
+              "displayName": "Fuente de datos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asignado a",
+              "displayName": "Asignado a",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notas de revisión",
+              "displayName": "Notas de revisión",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Tipo de campo",
+              "displayName": "Tipo de campo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Numérico",
+                  "value": "Numérico"
+                },
+                {
+                  "name": "Texto",
+                  "value": "Texto"
+                },
+                {
+                  "name": "Fecha",
+                  "value": "Fecha"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                },
+                {
+                  "name": "Revisar documento adjunto.",
+                  "value": "Revisar documento adjunto."
+                },
+                {
+                  "name": "Corregido en sistema.",
+                  "value": "Corregido en sistema."
+                },
+                {
+                  "name": "Solicitar documentación al cliente.",
+                  "value": "Solicitar documentación al cliente."
+                },
+                {
+                  "name": "Falta segundo nombre.",
+                  "value": "Falta segundo nombre."
+                },
+                {
+                  "name": "Actualizado correctamente.",
+                  "value": "Actualizado correctamente."
+                },
+                {
+                  "name": "Verificar dirección en AFIP.",
+                  "value": "Verificar dirección en AFIP."
+                },
+                {
+                  "name": "Corregido por usuario.",
+                  "value": "Corregido por usuario."
+                },
+                {
+                  "name": "Solicitar foto del vehículo.",
+                  "value": "Solicitar foto del vehículo."
+                },
+                {
+                  "name": "Solicitar número alternativo.",
+                  "value": "Solicitar número alternativo."
+                },
+                {
+                  "name": "Corregido en base de datos.",
+                  "value": "Corregido en base de datos."
+                },
+                {
+                  "name": "Verificar con fabricante.",
+                  "value": "Verificar con fabricante."
+                },
+                {
+                  "name": "Corregido por sistema.",
+                  "value": "Corregido por sistema."
+                },
+                {
+                  "name": "Solicitar copia legible.",
+                  "value": "Solicitar copia legible."
+                },
+                {
+                  "name": "Verificar con aseguradora.",
+                  "value": "Verificar con aseguradora."
+                },
+                {
+                  "name": "Corregido por operador.",
+                  "value": "Corregido por operador."
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Resolución rápida",
+              "displayName": "Resolución rápida",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Resumen del caso",
+              "displayName": "Resumen del caso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        -224
+      ],
+      "id": "5f4783d4-3130-48e2-9f60-1d655915c802",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "fxC6KwjP0wOnXVUi",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "app4ap36WRIaXrZn3",
+          "mode": "list",
+          "cachedResultName": "Casos",
+          "cachedResultUrl": "https://airtable.com/app4ap36WRIaXrZn3"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblx5eOEhra2thl3G",
+          "mode": "list",
+          "cachedResultName": "Log de Casos",
+          "cachedResultUrl": "https://airtable.com/app4ap36WRIaXrZn3/tblx5eOEhra2thl3G"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Intento": 1,
+            "Legajo": "={{ $json.legajo }}",
+            "Rama": "HITL",
+            "Estado": "={{ $json.estado }}",
+            "Campo": "={{ $json.campos.map(c => `${c.campo}: ${c.valor}`).join(', ') }}",
+            "Periodo": "={{ $('Estructura_IA').item.json.periodo }}",
+            "Texto original": "={{ $('Estructura_IA').item.json.texto_original }}",
+            "Observacion": "={{ $('Estructura_IA').item.json.observacion }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Legajo",
+              "displayName": "Legajo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Periodo",
+              "displayName": "Periodo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Rama",
+              "displayName": "Rama",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Automática",
+                  "value": "Automática"
+                },
+                {
+                  "name": "HITL",
+                  "value": "HITL"
+                },
+                {
+                  "name": "Vida",
+                  "value": "Vida"
+                },
+                {
+                  "name": "Automotor",
+                  "value": "Automotor"
+                },
+                {
+                  "name": "ART",
+                  "value": "ART"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "ok",
+                  "value": "ok"
+                },
+                {
+                  "name": "requiere_revision",
+                  "value": "requiere_revision"
+                },
+                {
+                  "name": "error",
+                  "value": "error"
+                },
+                {
+                  "name": "Abierto",
+                  "value": "Abierto"
+                },
+                {
+                  "name": "Cerrado",
+                  "value": "Cerrado"
+                },
+                {
+                  "name": "En revisión",
+                  "value": "En revisión"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Campo",
+              "displayName": "Campo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Valor",
+              "displayName": "Valor",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Observacion",
+              "displayName": "Observacion",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Texto original",
+              "displayName": "Texto original",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Intento",
+              "displayName": "Intento",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Período-Mes",
+              "displayName": "Período-Mes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Fuente de datos",
+              "displayName": "Fuente de datos",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Asignado a",
+              "displayName": "Asignado a",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notas de revisión",
+              "displayName": "Notas de revisión",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Tipo de campo",
+              "displayName": "Tipo de campo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Numérico",
+                  "value": "Numérico"
+                },
+                {
+                  "name": "Texto",
+                  "value": "Texto"
+                },
+                {
+                  "name": "Fecha",
+                  "value": "Fecha"
+                },
+                {
+                  "name": "Otro",
+                  "value": "Otro"
+                },
+                {
+                  "name": "Revisar documento adjunto.",
+                  "value": "Revisar documento adjunto."
+                },
+                {
+                  "name": "Corregido en sistema.",
+                  "value": "Corregido en sistema."
+                },
+                {
+                  "name": "Solicitar documentación al cliente.",
+                  "value": "Solicitar documentación al cliente."
+                },
+                {
+                  "name": "Falta segundo nombre.",
+                  "value": "Falta segundo nombre."
+                },
+                {
+                  "name": "Actualizado correctamente.",
+                  "value": "Actualizado correctamente."
+                },
+                {
+                  "name": "Verificar dirección en AFIP.",
+                  "value": "Verificar dirección en AFIP."
+                },
+                {
+                  "name": "Corregido por usuario.",
+                  "value": "Corregido por usuario."
+                },
+                {
+                  "name": "Solicitar foto del vehículo.",
+                  "value": "Solicitar foto del vehículo."
+                },
+                {
+                  "name": "Solicitar número alternativo.",
+                  "value": "Solicitar número alternativo."
+                },
+                {
+                  "name": "Corregido en base de datos.",
+                  "value": "Corregido en base de datos."
+                },
+                {
+                  "name": "Verificar con fabricante.",
+                  "value": "Verificar con fabricante."
+                },
+                {
+                  "name": "Corregido por sistema.",
+                  "value": "Corregido por sistema."
+                },
+                {
+                  "name": "Solicitar copia legible.",
+                  "value": "Solicitar copia legible."
+                },
+                {
+                  "name": "Verificar con aseguradora.",
+                  "value": "Verificar con aseguradora."
+                },
+                {
+                  "name": "Corregido por operador.",
+                  "value": "Corregido por operador."
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resolución rápida",
+              "displayName": "Resolución rápida",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Resumen del caso",
+              "displayName": "Resumen del caso",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        2208,
+        32
+      ],
+      "id": "8668d762-94c3-4b20-85fd-94dea1546660",
+      "name": "Create a record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "fxC6KwjP0wOnXVUi",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Estructura_IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "conceptos_novedades",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "estructura_excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "mensaje_revision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "estructura_respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "estructura_ia_2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Estructura_mensaje_final",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "estructura_excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Estructura_1_1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje Novedades": {
+      "main": [
+        [
+          {
+            "node": "Estructurar novedades",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conceptos de liquidacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estructurar novedades": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Conceptos de liquidacion": {
+      "main": [
+        [
+          {
+            "node": "estructura conceptos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estructura conceptos": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "conceptos_novedades": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estructura_IA": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mensaje_revision": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estructura_excel": {
+      "main": [
+        [
+          {
+            "node": "Actualizar_excel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Actualizar_excel": {
+      "main": [
+        []
+      ]
+    },
+    "Estructura_mensaje_final": {
+      "main": [
+        [
+          {
+            "node": "Aviso_revisiones_ok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aviso_revisiones_ok": {
+      "main": [
+        []
+      ]
+    },
+    "Estructura_1_1": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estructura_respuesta": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estructura_ia_2": {
+      "main": [
+        [
+          {
+            "node": "estructura_final_ok",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "estructura_final_ok": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ecd331ba63fe53baec0c714962a6770c27d40218165601530816731fc6ebb68"
+  }
+}
