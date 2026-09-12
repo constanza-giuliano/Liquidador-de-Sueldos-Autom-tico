@@ -1,0 +1,42 @@
+const items = $input.all();
+const catalogoCorto = $('estructura conceptos').first().json.catalogo
+  .split('\n')
+  .map(line => line.split(':')[0])
+  .join(', ');
+
+const porLegajo = {};
+for (const item of items) {
+  const { legajo, texto_original, observacion, campo, es_alta } = item.json;
+  if (!porLegajo[legajo]) {
+    porLegajo[legajo] = { legajo, texto_original, es_alta: false, camposFaltantes: [], motivos: [] };
+  }
+  if (es_alta) porLegajo[legajo].es_alta = true;
+  if (campo) porLegajo[legajo].camposFaltantes.push(campo);
+  if (observacion) porLegajo[legajo].motivos.push(observacion);
+}
+
+return Object.values(porLegajo).map(caso => {
+  let instrucciones;
+
+  if (caso.es_alta) {
+    instrucciones = `Es un ALTA de empleado nuevo. Para completarla, necesito SÍ O SÍ estos datos: ${caso.camposFaltantes.join(', ')}`;
+  } else {
+    instrucciones = `Columnas disponibles: ${catalogoCorto}`;
+  }
+
+  const mensaje = `⚠️ Caso requiere revisión
+
+Legajo: ${caso.legajo}
+Novedad original: "${caso.texto_original}"
+Motivos pendientes:
+${caso.motivos.map(m => `- ${m}`).join('\n')}
+
+${instrucciones}
+
+Para aprobar, respondé con este formato:
+LEGAJO, COLUMNA, VALOR; COLUMNA, VALOR
+
+Ejemplo: 00025, Dias ART POST, 15; Dias Vacaciones, 5`;
+
+  return { json: { legajo: caso.legajo, mensaje, chat_id: 6734452331 } };
+});
