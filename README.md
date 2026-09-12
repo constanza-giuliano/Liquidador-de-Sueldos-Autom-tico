@@ -88,15 +88,30 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 🔗 https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD
 
+
 ### 5.3 Esquemas JSON de las integraciones
 
 **Salida del primer agente IA (interpretación de novedad):**
 
-📋 **[PEGAR AQUÍ: JSON de ejemplo del output del primer agente]**
+📋 [
+  {
+    "output": "{\n  \"legajo\": \"00025\",\n  \"periodo\": \"Agosto 2026\",\n  \"texto_original\": \"tuvo vacaciones del 08/08 al 25/08\",\n  \"estado\": \"ok\",\n  \"motivo_revision\": \"\",\n  \"campos_modificados\": [\n    { \"campo\": \"Dias Vacaciones\", \"valor\": \"18\" },\n    { \"campo\": \"Dias Trabajados\", \"valor\": \"12\" }\n  ]\n}"
+  },
+  {
+    "output": "{\n  \"legajo\": \"00101\",\n  \"periodo\": \"Agosto 2026\",\n  \"texto_original\": \"fue despedido sin causa el 10/8/2026\",\n  \"estado\": \"requiere_revision\",\n  \"motivo_revision\": \"Desvinculación detectada, requiere validación humana antes de liquidar\",\n  \"campos_modificados\": []\n}"
+  },
+  {
+    "output": "{\n  \"legajo\": \"00203\",\n  \"periodo\": \"Agosto 2026\",\n  \"texto_original\": \"fue dado de alta el 17/08/2026\",\n  \"estado\": \"requiere_revision\",\n  \"motivo_revision\": \"Alta de empleado nuevo, requiere carga manual de datos estructurales antes de procesar: Legajo, Nombre, Categoria, Jornada, FI, Sit.Contrib, Dias trabajados\",\n  \"campos_modificados\": []\n}"
+  }
+]
 
 **Salida del segundo agente IA (validación de corrección manual):**
-
-📋 **[PEGAR AQUÍ: JSON de ejemplo del output del segundo agente]**
+Ejemplo para el segundo caso que general el primer agente:
+[
+  {
+    "output": "00101, Dias Trabajados, 10; *Dias Vac NG Prop, 7; *Dias SAC Prop, 66"
+  }
+]
 
 *(El detalle completo de todos los JSON de prueba usados durante el desarrollo está en `ANEXOS.md`.)*
 
