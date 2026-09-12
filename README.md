@@ -14,7 +14,8 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 ## 2. Entregable 1 — Mapa de arquitectura (20%)
 
-📄 [Ver diagrama de arquitectura](Diagrama/Arquitectura.pdf)
+📄 [Ver diagrama de arquitectura](Diagrama/arquitectura.pdf)
+Diagrama/arquitectura.pdf
 
 **Resumen del flujo:**
 1. El estudio envía las novedades del mes por Telegram, en texto libre, para todos los empleados en un solo mensaje.
