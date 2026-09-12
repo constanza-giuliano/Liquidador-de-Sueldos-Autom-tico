@@ -219,8 +219,7 @@ Estas mejoras quedan identificadas y planificadas, pero no implementadas por res
 
 ## 11. JSON del flujo de n8n
 
-📋  → `/json/workflow_n8n.json`
-ANEXOS/Json completo n8n.txt
+📋 [Ver JSON completo del workflow](ANEXOS/Json%20completo%20n8n.txt)
 ---
 
 ## 12. Video demo
