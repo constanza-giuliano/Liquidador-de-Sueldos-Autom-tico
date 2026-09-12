@@ -13,7 +13,7 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 ## 2. Diagrama de arquitectura
 
-📄 **[PEGAR AQUÍ: PDF del diagrama de arquitectura]** → `/diagrama/arquitectura.pdf`
+Diagrama.png
 
 *El diagrama debe mostrar: trigger de Telegram, nodo de extracción de novedades, primer agente IA (interpretación), consulta al catálogo de Airtable, nodo de decisión (If), rama automática (Google Sheets), rama HITL (Loop Over Items + segundo agente IA de validación + Append/Update en Sheets), y los dos puntos de logging en Airtable.*
 
