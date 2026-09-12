@@ -13,9 +13,31 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 ## 2. Diagrama de arquitectura
 
-Diagrama.png
+📄 [Ver diagrama de arquitectura](Diagrama/Arquitectura.pdf)
 
-*El diagrama debe mostrar: trigger de Telegram, nodo de extracción de novedades, primer agente IA (interpretación), consulta al catálogo de Airtable, nodo de decisión (If), rama automática (Google Sheets), rama HITL (Loop Over Items + segundo agente IA de validación + Append/Update en Sheets), y los dos puntos de logging en Airtable.*
+1. Disparo: el estudio envía las novedades del mes por Telegram, en un solo mensaje de texto libre con todos los empleados.
+
+2. Extracción: un nodo de código separa ese mensaje en una novedad individual por empleado.
+
+3. Interpretación (Agente IA 1 — Claude): cada novedad se interpreta contra el catálogo de conceptos válidos cargado en Airtable (funciona como fuente RAG), determinando qué campos del legajo corresponde modificar y con qué valor.
+
+4. Decisión (¿Estado = ok?):
+
+Sí → el caso está completo y sin ambigüedad → se escribe automáticamente en Google Sheets (motor de cálculo con fórmulas) y queda registrado en el Log de Casos (Airtable).
+No → el caso requiere revisión humana (despido, alta de empleado, dato incompleto o concepto no reconocido) → entra al ciclo de aprobación.
+
+5. Ciclo de revisión humana (HITL):
+
+Loop Over Items toma los casos pendientes de a uno.
+El sistema envía un mensaje por Telegram explicando qué falta y espera la respuesta.
+La respuesta pasa por el Agente IA 2 (DeepSeek), que valida el formato, normaliza datos (fechas, texto) y confirma si el caso queda resuelto.
+¿Campos OK?
+Sí → se escribe en Sheets (actualiza si el empleado existe, agrega una fila nueva si es un alta) y el Log de Casos registra el resultado. El Loop pasa al siguiente caso pendiente.
+No → se vuelve a pedir el dato faltante para el mismo caso, sin avanzar a otro.
+
+6. Cierre: cuando ya no quedan casos pendientes, el Loop dispara un mensaje final de Telegram confirmando que la revisión terminó.
+
+7. Trazabilidad: cada intento — automático o manual, exitoso o no — queda registrado en el Log de Casos de Airtable, base del control de errores y del dashboard.
 
 ---
 
