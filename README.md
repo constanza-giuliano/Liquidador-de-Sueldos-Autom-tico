@@ -44,7 +44,7 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 
 **Regla de diseño clave:** la IA únicamente escribe en las columnas de "días" y datos estructurales de alta. Los campos de resultado (Neto, Bruto, Aportes, Contribuciones) siempre se calculan por fórmula — la IA nunca hace aritmética de montos.
 
-🔗 https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=sharing
+🔗 [Ver tabla principal para liquidar sueldos  — Google Sheet](https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=sharing)
 
 ### 5.2 Airtable 
 #### Memoria del sistema
@@ -87,7 +87,7 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
     "Fecha": "9/12/2026 9:16pm"
   }]
 
-🔗 [Ver casos de ejecucion trakeados para su posterior analisis  — Airtable](https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD)
+🔗 [Ver casos de ejecucion trackeados para su posterior analisis  — Airtable](https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD)
 
 
 ### 5.3 Esquemas JSON de las integraciones
