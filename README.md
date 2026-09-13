@@ -54,7 +54,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 10. Cuando no quedan casos pendientes, se envía un mensaje de cierre.
 11. Cada intento (automático o manual) queda registrado en una tabla de Airtable ("Log de Casos"), con su estado, para trazabilidad y control de errores.
 
-📄 [Ver diagrama de arquitectura](ANEXOS/arquitectura.pdf)
+![Ver diagrama de arquitectura](ANEXOS/arquitectura_flujo.pdf)
 ---
 
 ## 4. Entregable 2 — Estructuras de datos documentadas
