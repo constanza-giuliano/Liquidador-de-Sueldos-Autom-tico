@@ -47,7 +47,7 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
 🔗 https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=sharing
 
 ### 5.2 Airtable 
-#### Memoria y registro del sistema
+#### Memoria del sistema
 
 **Tabla "Conceptos_liquidacion.xlsx"** (catálogo cerrado, actúa como fuente RAG):
 
@@ -60,7 +60,7 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
   }]
 
 
-🔗 https://airtable.com/appqY1jYtEzBGJRrb/shrAiUMsPblmUqziY
+🔗  [Ver conceptos de liquidacion a utilizar como RAG — Airtable](https://airtable.com/appqY1jYtEzBGJRrb/shrAiUMsPblmUqziY)
 
 #### Tabla "Log de Casos"** (registro de trazabilidad):
 
@@ -87,7 +87,7 @@ Estudio contable que liquida sueldos bajo el convenio UTHGRA-CATC para un client
     "Fecha": "9/12/2026 9:16pm"
   }]
 
-🔗 https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD
+🔗 [Ver casos de ejecucion trakeados para su posterior analisis  — Airtable](https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD)
 
 
 ### 5.3 Esquemas JSON de las integraciones
@@ -190,6 +190,8 @@ El dashboard se implementó como una **Airtable Interface**, alimentada directam
 - **Cases by Branch** (gráfico de barras): compara el volumen de casos procesados por la **rama Automática** frente a la **rama HITL**, mostrando cuánto trabajo absorbe cada camino del flujo.
 
 Ambos gráficos se actualizan solos con cada nueva ejecución del flujo de n8n, ya que leen en tiempo real los registros que se van creando en "Log de Casos" — no requieren mantenimiento manual ni recarga de datos.
+
+
 ---
 
 ## 9. Test de estrés y camino infeliz
