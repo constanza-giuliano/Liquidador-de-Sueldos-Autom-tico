@@ -215,8 +215,8 @@ Mensaje de prueba enviado (5 empleados en una sola corrida):
 
 **Resultado de la corrida:** de 5 novedades, 2 se resolvieron automáticamente (casos 1 y 4) y 3 quedaron correctamente derivadas a revisión humana por motivos distintos entre sí (dato faltante, regla de negocio de despido, y alta de personal) — evidencia de que el sistema no fuerza ni asume información cuando no corresponde.
 
-📸  [Ver ejemplos de distintos casos ejecutados](ANEXOS/Ejecuciones)
-✅
+📸[Ver ejemplos de distintos casos ejecutados](ANEXOS/Ejecuciones)
+
 ---
 
 ## 10. Trabajo Futuro / próximos pasos
