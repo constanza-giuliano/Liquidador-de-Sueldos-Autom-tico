@@ -182,7 +182,7 @@ Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos)
 
 ## 8. Entregable 5 — Dashboard de control (20%)
 
-🔗 [Ver Dashboard de KPIs — Airtable Interface]((https://airtable.com/app4ap36WRIaXrZn3/pagVR6PiiR0a3kWD0)
+🔗 [Ver Dashboard de KPIs — Airtable Interface](https://airtable.com/app4ap36WRIaXrZn3/pagVR6PiiR0a3kWD0)
 
 El dashboard se implementó como una **Airtable Interface**, alimentada directamente por la tabla "Log de Casos", con dos visualizaciones:
 
