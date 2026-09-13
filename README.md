@@ -207,11 +207,11 @@ Mensaje de prueba enviado (5 empleados en una sola corrida):
 
 | # | Caso probado | Resultado esperado | Evidencia |
 |---|---|---|---|
-| 1 | Novedad simple y completa (vacaciones) | Procesamiento 100% automático: escribe "Dias Vacaciones" y recalcula "Dias Trabajados" en Google Sheets, sin intervención humana | ![Caso 1](imagenes/caso1_vacaciones_ok.png) |
-| 2 | **Camino infeliz**: dato incompleto (falta la cantidad de días) | El sistema no inventa un valor. Detecta que falta el número de días injustificados y deriva el caso a revisión humana con el motivo explícito | ![Caso 2](imagenes/caso2_dato_incompleto.png) |
-| 3 | Despido | Nunca se autoprocesa, sin importar que la fecha esté completa. Va directo a revisión humana (regla de negocio, no error de datos) | ![Caso 3](imagenes/caso3_despido_revision.png) |
-| 4 | Licencia por ART sin fecha de fin ("continúa") | El sistema aplica la regla especial: asume cierre al día 30 del mes y calcula automáticamente "Dias ART 10" y "Dias ART POST" sin necesitar revisión, pese a la ambigüedad aparente del texto | ![Caso 4](imagenes/caso4_art_continua.png) |
-| 5 | Alta de empleado nuevo | El legajo no existe en la base; el sistema no crea el registro solo. Deriva a revisión humana pidiendo los datos estructurales obligatorios (Nombre, Categoría, Jornada, FI, Sit. Contrib., Días Trabajados) | ![Caso 5](imagenes/caso5_alta_revision.png) |
+| 1 | Novedad simple y completa (vacaciones) | Procesamiento 100% automático: escribe "Dias Vacaciones" y recalcula "Dias Trabajados" en Google Sheets, sin intervención humana | ![Caso 1](ANEXOS/Ejecuciones/casos_exito.png) |
+| 2 | **Camino infeliz**: dato incompleto (falta la cantidad de días) | El sistema no inventa un valor. Detecta que falta el número de días injustificados y deriva el caso a revisión humana con el motivo explícito | ![Caso 2](ANEXOS/Ejecuciones/caso_falta_requieren_revision.png) |
+| 3 | Despido | Nunca se autoprocesa, sin importar que la fecha esté completa. Va directo a revisión humana (regla de negocio, no error de datos) | ![Caso 3](ANEXOS/Ejecuciones/caso_despido_requieren_revision.png) |
+| 4 | Licencia por ART sin fecha de fin ("continúa") | El sistema aplica la regla especial: asume cierre al día 30 del mes y calcula automáticamente "Dias ART 10" y "Dias ART POST" sin necesitar revisión, pese a la ambigüedad aparente del texto | ![Caso 4](ANEXOS/Ejecuciones/casos_exito.png) |
+| 5 | Alta de empleado nuevo | El legajo no existe en la base; el sistema no crea el registro solo. Deriva a revisión humana pidiendo los datos estructurales obligatorios (Nombre, Categoría, Jornada, FI, Sit. Contrib., Días Trabajados) | ![Caso 5](ANEXOS/Ejecuciones/caso_alta_requieren_revision.png) |
 
 **Resultado de la corrida:** de 5 novedades, 2 se resolvieron automáticamente (casos 1 y 4) y 3 quedaron correctamente derivadas a revisión humana por motivos distintos entre sí (dato faltante, regla de negocio de despido, y alta de personal) — evidencia de que el sistema no fuerza ni asume información cuando no corresponde.
 
