@@ -182,7 +182,14 @@ Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos)
 
 ## 8. Entregable 5 — Dashboard de control (20%)
 
-🔗https://airtable.com/invite/l?inviteId=invTc7SaWSho9kWn4&inviteToken=4e3afed95858a805f493003cb47969b0c4bb7ca5a4975a0ec6dec7781ccfa338&utm_medium=email&utm_source=product_team&utm_content=transactional-alerts
+🔗 [Ver Dashboard de KPIs — Airtable Interface]((https://airtable.com/app4ap36WRIaXrZn3/pagVR6PiiR0a3kWD0)
+
+El dashboard se implementó como una **Airtable Interface**, alimentada directamente por la tabla "Log de Casos", con dos visualizaciones:
+
+- **Cases by Status** (gráfico de torta): muestra la proporción de casos resueltos automáticamente (`ok`) vs. los que requirieron revisión humana (`requiere_revision`) — en la corrida de prueba, un 70% se procesó sin intervención y un 30% pasó por HITL. Esta es la **tasa de errores/revisión** del sistema.
+- **Cases by Branch** (gráfico de barras): compara el volumen de casos procesados por la **rama Automática** frente a la **rama HITL**, mostrando cuánto trabajo absorbe cada camino del flujo.
+
+Ambos gráficos se actualizan solos con cada nueva ejecución del flujo de n8n, ya que leen en tiempo real los registros que se van creando en "Log de Casos" — no requieren mantenimiento manual ni recarga de datos.
 ---
 
 ## 9. Test de estrés y camino infeliz
