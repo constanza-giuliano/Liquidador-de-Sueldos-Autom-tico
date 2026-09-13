@@ -4,6 +4,23 @@
 Sistema de automatización que interpreta novedades mensuales de liquidación de sueldos (enviadas en lenguaje natural por Telegram), las valida contra el convenio colectivo UTHGRA, actualiza automáticamente la base de cálculo en Google Sheets, y gestiona un ciclo de aprobación humana (HITL) para los casos que requieren revisión: despidos, altas de personal y correcciones de datos.
 
 ---
+## Índice
+
+1. [Caso de uso](#1-caso-de-uso)
+2. [Herramienta de orquestación](#2-herramienta-de-orquestación)
+3. [Diagrama de arquitectura](#3-diagrama-de-arquitectura)
+4. [Estructura del repositorio](#4-estructura-del-repositorio)
+5. [Entregable 1 — Mapa de arquitectura (20%)](#5-entregable-1--mapa-de-arquitectura-20)
+6. [Entregable 2 — Estructuras de datos documentadas (20%)](#6-entregable-2--estructuras-de-datos-documentadas-20)
+7. [Entregable 3 — Optimización de costos (20%)](#7-entregable-3--optimización-de-costos-20)
+8. [Entregable 4 — Seguridad y resiliencia (20%)](#8-entregable-4--seguridad-y-resiliencia-20)
+9. [Entregable 5 — Dashboard de control (20%)](#9-entregable-5--dashboard-de-control-20)
+10. [Test de estrés y camino infeliz](#10-test-de-estrés-y-camino-infeliz)
+11. [Trabajo pendiente / próximos pasos](#11-trabajo-pendiente--próximos-pasos)
+12. [JSON del flujo de n8n](#12-json-del-flujo-de-n8n)
+13. [Video demo](#13-video-demo)
+
+---
 
 ## 1. Caso de uso
 
@@ -23,7 +40,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 
 ![Ver flujo de n8n](ANEXOS/flujo_n8n_completo.png)
 ---
-## 2. Entregable 1 — Mapa de arquitectura
+## 3. Entregable 1 — Mapa de arquitectura
 
 **Resumen del flujo:**
 1. El estudio envía las novedades del mes por Telegram, en texto libre, para todos los empleados en un solo mensaje.
@@ -41,9 +58,9 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 📄 [Ver diagrama de arquitectura](ANEXOS/arquitectura.pdf)
 ---
 
-## 3. Entregable 2 — Estructuras de datos documentadas
+## 4. Entregable 2 — Estructuras de datos documentadas
 
-### 3.1 Google Sheets — motor de cálculo
+### 4.1 Google Sheets — motor de cálculo
 
 | Hoja 1| Captar todas las novedades relativas a cada empleado que forma parte de la nomina de la empresa |
 |---|---|
@@ -55,7 +72,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 
 🔗 [Ver tabla principal para liquidar sueldos  — Google Sheet](https://docs.google.com/spreadsheets/d/17Huq61I99lb1DyzJ_HmtNzGLsm7dj8Qss43D3zzx9Ig/edit?usp=sharing)
 
-### 3.2 Airtable 
+### 4.2 Airtable 
 #### Memoria del sistema
 
 **Tabla "Conceptos_liquidacion.xlsx"** (catálogo cerrado, actúa como fuente RAG):
@@ -99,7 +116,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 🔗 [Ver casos de ejecucion trackeados para su posterior analisis  — Airtable](https://airtable.com/app4ap36WRIaXrZn3/shrFirxxI2lcSCHvD)
 
 
-### 3.3 Esquemas JSON de las integraciones
+### 4.3 Esquemas JSON de las integraciones
 
 **Salida del primer agente IA (interpretación de novedad):**
 
@@ -127,9 +144,9 @@ Ejemplo para el segundo caso que general el primer agente:
 
 ---
 
-## 4. Entregable 3 — Optimización de costos
+## 5. Entregable 3 — Optimización de costos
 
-### 4.1 Justificación de modelos por tarea
+### 5.1 Justificación de modelos por tarea
 
 El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de cada tarea — no por preferencia arbitraria, sino porque cada una tiene requisitos distintos de razonamiento y de frecuencia de uso.
 
@@ -138,7 +155,7 @@ El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de
 | **Interpretación de novedades** (primer agente) | **Claude** | Tarea de comprensión de lenguaje natural con reglas implícitas complejas: cálculo de tramos de ART (día 10 vs. día 11), detección de intención (despido vs. renuncia vs. alta), inferencia de Días Trabajados a partir de otros campos. Requiere razonamiento en varios pasos y buena adherencia a instrucciones normativas — se ejecuta **una vez por novedad y por mes**, volumen bajo, así que el costo por llamada tiene bajo impacto total. |
 | **Validación de correcciones manuales** (segundo agente) | **DeepSeek** | Tarea más mecánica: matchear texto contra un catálogo cerrado, normalizar formatos de fecha y texto, chequear rangos válidos. No requiere el mismo nivel de razonamiento normativo. Se ejecuta **potencialmente varias veces por caso** (reintentos dentro del loop HITL), por lo que el volumen de llamadas es mayor y variable — un modelo de menor costo por token reduce el impacto de los reintentos sin sacrificar calidad, ya que la tarea es de clasificación/validación, no de interpretación abierta. |
 
-### 4.2 Estimación de costos (valores de referencia)
+### 5.2 Estimación de costos (valores de referencia)
 
 > Nota: los precios de las APIs de IA cambian con frecuencia. Los valores siguientes son órdenes de magnitud a fines del análisis comparativo del proyecto, no una cotización vigente — antes de un uso productivo real conviene verificar el pricing actualizado en la documentación oficial de cada proveedor.
 
@@ -149,7 +166,7 @@ El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de
 | Costo relativo por llamada | Claude: mayor costo/token, pero bajo volumen. DeepSeek: menor costo/token, absorbe el volumen variable de reintentos sin escalar tanto el gasto total. |
 | Ahorro estimado vs. usar el modelo más caro en ambos pasos | Al concentrar el modelo premium solo en la tarea que lo justifica (interpretación), y usar un modelo económico en la tarea de mayor frecuencia (validación con reintentos), el costo total del ciclo HITL se reduce significativamente frente a usar Claude en los dos pasos, sin pérdida de calidad en la validación mecánica. |
 
-### 4.3 Otras medidas de optimización de costos
+### 5.3 Otras medidas de optimización de costos
 
 - **Max Tokens acotado** en ambos agentes, ya que las respuestas son JSON estructurado de tamaño predecible, no texto abierto.
 - **Catálogo pasado como texto plano resumido** (no JSON anidado) al prompt, reduciendo tokens de entrada en cada llamada.
@@ -157,14 +174,14 @@ El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de
 
 ---
 
-## 5. Entregable 4 — Seguridad y resiliencia
+## 6. Entregable 4 — Seguridad y resiliencia
 
-### 5.1 Minimización de datos
+### 6.1 Minimización de datos
 
 - El agente de IA nunca recibe columnas de sueldos ya calculados (Neto, Bruto, Aportes) — solo datos estructurales y de novedades. Esto limita la exposición de información sensible del empleado a lo estrictamente necesario para la tarea.
 - Los datos de prueba usados durante el desarrollo (nombres, legajos) están anonimizados antes de subirse como evidencia a este repositorio.
 
-### 5.2 Rutas de error implementadas
+### 6.2 Rutas de error implementadas
 
 | Situación | Manejo |
 |---|---|
@@ -175,13 +192,13 @@ El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de
 | Falla de parseo de la respuesta de la IA | Manejo explícito de error en el código, no se asume estructura válida por defecto |
 | Reintentos indefinidos en el loop HITL | Ver punto 7.3 |
 
-### 5.3 Filtro anti-bucle infinito
+### 6.3 Filtro anti-bucle infinito
 
 El ciclo de revisión humana (Loop Over Items) procesa un caso a la vez, y solo devuelve el control al loop principal cuando el caso queda resuelto (estado "ok"); un caso no resuelto vuelve únicamente al paso de reenvío de mensaje, sin re-ingresar como ítem nuevo del loop — evitando la multiplicación de tareas pendientes.
 
 Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos), que corte el ciclo y derive el caso a revisión manual fuera del sistema si se supera el límite — mitigación adicional más allá del comportamiento actual.
 
-### 5.4 Puntos de Human-in-the-loop (HITL)
+### 6.4 Puntos de Human-in-the-loop (HITL)
 
 1. **Despidos** (con o sin causa): nunca se procesan automáticamente, sin importar qué tan completa esté la información.
 2. **Altas de empleados nuevos**: requieren confirmación humana de los datos estructurales obligatorios (Nombre, Categoría, Jornada, Fecha de ingreso, Situación contributiva) antes de crear el registro.
@@ -189,7 +206,7 @@ Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos)
 
 ---
 
-## 6. Entregable 5 — Dashboard de control
+## 7. Entregable 5 — Dashboard de control
 
 🔗 [Ver Dashboard de KPIs — Airtable Interface](https://airtable.com/app4ap36WRIaXrZn3/pagVR6PiiR0a3kWD0)
 
@@ -203,7 +220,7 @@ Ambos gráficos se actualizan solos con cada nueva ejecución del flujo de n8n, 
 
 ---
 
-## 7. Test de estrés y camino infeliz
+## 8. Test de estrés y camino infeliz
 
 Mensaje de prueba enviado (5 empleados en una sola corrida):
 
@@ -228,19 +245,19 @@ Mensaje de prueba enviado (5 empleados en una sola corrida):
 
 ---
 
-## 8. Trabajo Futuro / próximos pasos
+## 9. Trabajo Futuro / próximos pasos
 
 **Sub-workflow de mantenimiento de Google Sheets**: un flujo separado para (a) limpiar/resetear las columnas de días de la hoja "Empleados" al inicio de cada nuevo período de liquidación, y (b) actualizar la hoja "Escala/Convenio" cuando cambie el acuerdo paritario, sin tener que hacerlo a mano. Quedó fuera de esta entrega por alcance y tiempo, pensado como la siguiente iteración del proyecto.
 
 ---
 
-## 9. JSON del flujo de n8n
+## 10. JSON del flujo de n8n
 
 📋  [Ver JSON completo del workflow](ANEXOS/Json%20completo%20n8n.txt)
 
 ---
 
-## 10. Video demo
+## 11. Video demo
 
 🎥
 
