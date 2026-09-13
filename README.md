@@ -196,18 +196,27 @@ Ambos gráficos se actualizan solos con cada nueva ejecución del flujo de n8n, 
 
 ## 9. Test de estrés y camino infeliz
 
-Casos probados durante el desarrollo:
+Mensaje de prueba enviado (5 empleados en una sola corrida):
 
-- ✅ Novedad simple (vacaciones) → procesamiento automático correcto, incluyendo recálculo de Días Trabajados.
-- ✅ Despido → correctamente derivado a revisión humana, sin autoprocesarse.
-- ✅ Alta de empleado nuevo con datos incompletos → sistema pide específicamente los campos faltantes, no crea la fila hasta tenerlos todos.
-- ✅ Alta de empleado nuevo con datos completos → crea la fila nueva (Append) en Google Sheets.
-- ✅ Corrección manual con formato de fecha no estándar (dd/mm/aaaa en vez de dd-mm-aaaa) → normalizado automáticamente por el segundo agente.
-- ✅ Corrección manual con opción de texto en minúsculas ("normal" en vez de "NORMAL") → normalizado automáticamente.
-- ⚠️ Se detectó y corrigió durante el desarrollo un bug de multiplicación de items en el loop HITL (documentado como aprendizaje del proyecto, ver ANEXOS.md).
+> Novedades Agosto 2026:
+> 1. El empleado 0006 tuvo 7 días de vacaciones.
+> 2. El empleado 00100 faltó días injustificadamente.
+> 3. El empleado 00065 fue despedido el 17/8/2026.
+> 4. El empleado 00025 tuvo un accidente de trabajo y está de licencia desde el 8/8 y continúa.
+> 5. El empleado 00201 fue dado de alta el 17/08/2026.
+
+| # | Caso probado | Resultado esperado | Evidencia |
+|---|---|---|---|
+| 1 | Novedad simple y completa (vacaciones) | Procesamiento 100% automático: escribe "Dias Vacaciones" y recalcula "Dias Trabajados" en Google Sheets, sin intervención humana | ![Caso 1](imagenes/caso1_vacaciones_ok.png) |
+| 2 | **Camino infeliz**: dato incompleto (falta la cantidad de días) | El sistema no inventa un valor. Detecta que falta el número de días injustificados y deriva el caso a revisión humana con el motivo explícito | ![Caso 2](imagenes/caso2_dato_incompleto.png) |
+| 3 | Despido | Nunca se autoprocesa, sin importar que la fecha esté completa. Va directo a revisión humana (regla de negocio, no error de datos) | ![Caso 3](imagenes/caso3_despido_revision.png) |
+| 4 | Licencia por ART sin fecha de fin ("continúa") | El sistema aplica la regla especial: asume cierre al día 30 del mes y calcula automáticamente "Dias ART 10" y "Dias ART POST" sin necesitar revisión, pese a la ambigüedad aparente del texto | ![Caso 4](imagenes/caso4_art_continua.png) |
+| 5 | Alta de empleado nuevo | El legajo no existe en la base; el sistema no crea el registro solo. Deriva a revisión humana pidiendo los datos estructurales obligatorios (Nombre, Categoría, Jornada, FI, Sit. Contrib., Días Trabajados) | ![Caso 5](imagenes/caso5_alta_revision.png) |
+
+**Resultado de la corrida:** de 5 novedades, 2 se resolvieron automáticamente (casos 1 y 4) y 3 quedaron correctamente derivadas a revisión humana por motivos distintos entre sí (dato faltante, regla de negocio de despido, y alta de personal) — evidencia de que el sistema no fuerza ni asume información cuando no corresponde.
 
 📸  [Ver ejemplos de distintos casos ejecutados](ANEXOS/Ejecuciones)
-
+✅
 ---
 
 ## 10. Trabajo Futuro / próximos pasos
