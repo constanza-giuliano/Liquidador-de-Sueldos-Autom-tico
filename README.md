@@ -21,7 +21,7 @@ El proyecto se desarrolló íntegramente en **n8n**, elegido por sobre Make por 
 Esta combinación permitió construir un flujo que integra IA, lógica condicional, control de errores y aprobación humana en una sola plataforma, cumpliendo los 4 componentes tecnológicos obligatorios del proyecto.
 
 
-📄 ![Ver flujo de n8n](ANEXOS/flujo_n8n_completo.png)
+![Ver flujo de n8n](ANEXOS/flujo_n8n_completo.png)
 ---
 ## 2. Entregable 1 — Mapa de arquitectura (20%)
 
