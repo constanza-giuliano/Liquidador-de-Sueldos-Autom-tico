@@ -23,7 +23,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 
 ![Ver flujo de n8n](ANEXOS/flujo_n8n_completo.png)
 ---
-## 2. Entregable 1 — Mapa de arquitectura (20%)
+## 2. Entregable 1 — Mapa de arquitectura
 
 **Resumen del flujo:**
 1. El estudio envía las novedades del mes por Telegram, en texto libre, para todos los empleados en un solo mensaje.
@@ -41,7 +41,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 📄 [Ver diagrama de arquitectura](ANEXOS/arquitectura.pdf)
 ---
 
-## 3. Entregable 2 — Estructuras de datos documentadas (20%)
+## 3. Entregable 2 — Estructuras de datos documentadas
 
 ### 3.1 Google Sheets — motor de cálculo
 
@@ -127,7 +127,7 @@ Ejemplo para el segundo caso que general el primer agente:
 
 ---
 
-## 4. Entregable 3 — Optimización de costos (20%)
+## 4. Entregable 3 — Optimización de costos
 
 ### 4.1 Justificación de modelos por tarea
 
@@ -157,7 +157,7 @@ El sistema usa **dos modelos de IA distintos**, elegidos según la naturaleza de
 
 ---
 
-## 5. Entregable 4 — Seguridad y resiliencia (20%)
+## 5. Entregable 4 — Seguridad y resiliencia
 
 ### 5.1 Minimización de datos
 
@@ -189,7 +189,7 @@ Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos)
 
 ---
 
-## 6. Entregable 5 — Dashboard de control (20%)
+## 6. Entregable 5 — Dashboard de control
 
 🔗 [Ver Dashboard de KPIs — Airtable Interface](https://airtable.com/app4ap36WRIaXrZn3/pagVR6PiiR0a3kWD0)
 
