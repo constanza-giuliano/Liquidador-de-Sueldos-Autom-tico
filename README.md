@@ -182,7 +182,7 @@ Agregamos un contador explícito de intentos por caso (ej. máximo 3 reintentos)
 
 ## 8. Entregable 5 — Dashboard de control (20%)
 
-🔗 **[link/ Shared View con KPIs]**
+🔗https://airtable.com/invite/l?inviteId=invTc7SaWSho9kWn4&inviteToken=4e3afed95858a805f493003cb47969b0c4bb7ca5a4975a0ec6dec7781ccfa338&utm_medium=email&utm_source=product_team&utm_content=transactional-alerts
 ---
 
 ## 9. Test de estrés y camino infeliz
