@@ -32,7 +32,7 @@ El proyecto se desarrolló íntegramente en **n8n**, elegido por sobre Make por 
 
 - **Control granular del código:** n8n permite insertar nodos de JavaScript (`Code`) en cualquier punto del flujo, algo esencial en este proyecto dado que gran parte de la lógica (parseo de mensajes, normalización de respuestas, agrupación de resultados para evitar bucles) requería transformar datos de formas que un editor puramente visual no resuelve con la misma flexibilidad.
 - **Soporte nativo para agentes de IA con múltiples proveedores:** los nodos `AI Agent` de n8n permiten conectar distintos modelos (Claude, DeepSeek) dentro del mismo flujo sin fricción, lo cual fue clave para poder justificar la matriz de costos usando un modelo distinto según la naturaleza de cada tarea.
-- **El nodo "Send and Wait" para HITL:** n8n resuelve de forma nativa el patrón de "pausar la ejecución, esperar una respuesta humana por Telegram, y continuar" — que es el corazón del punto de validación humana pedido por la consigna — sin necesidad de armar webhooks ni lógica de espera por fuera de la herramienta.
+- **El nodo "Send and Wait" para HITL:** n8n resuelve de forma nativa el patrón de "pausar la ejecución, esperar una respuesta humana por Telegram, y continuar", que es el corazón del punto de validación humana pedido por la consigna, sin necesidad de armar webhooks ni lógica de espera por fuera de la herramienta.
 
 Esta combinación permitió construir un flujo que integra IA, lógica condicional, control de errores y aprobación humana en una sola plataforma, cumpliendo los 4 componentes tecnológicos obligatorios del proyecto.
 
