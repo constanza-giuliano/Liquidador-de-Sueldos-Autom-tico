@@ -56,7 +56,7 @@ Esta combinación permitió construir un flujo que integra IA, lógica condicion
 
 ![Ver diagrama de arquitectura](ANEXOS/arquitectura.png)
 
-![Ver diagrama de arquitectura](ANEXOS/arquitectura_flujo.pdf)
+[Ver diagrama de arquitectura en formato PDF](ANEXOS/arquitectura_flujo.pdf)
 
 ---
 
