@@ -4,21 +4,20 @@
 Sistema de automatización que interpreta novedades mensuales de liquidación de sueldos (enviadas en lenguaje natural por Telegram), las valida contra el convenio colectivo UTHGRA, actualiza automáticamente la base de cálculo en Google Sheets, y gestiona un ciclo de aprobación humana (HITL) para los casos que requieren revisión: despidos, altas de personal y correcciones de datos.
 
 ---
+
 ## Índice
 
 1. [Caso de uso](#1-caso-de-uso)
 2. [Herramienta de orquestación](#2-herramienta-de-orquestación)
-3. [Diagrama de arquitectura](#3-diagrama-de-arquitectura)
-4. [Estructura del repositorio](#4-estructura-del-repositorio)
-5. [Entregable 1 — Mapa de arquitectura (20%)](#5-entregable-1--mapa-de-arquitectura-20)
-6. [Entregable 2 — Estructuras de datos documentadas (20%)](#6-entregable-2--estructuras-de-datos-documentadas-20)
-7. [Entregable 3 — Optimización de costos (20%)](#7-entregable-3--optimización-de-costos-20)
-8. [Entregable 4 — Seguridad y resiliencia (20%)](#8-entregable-4--seguridad-y-resiliencia-20)
-9. [Entregable 5 — Dashboard de control (20%)](#9-entregable-5--dashboard-de-control-20)
-10. [Test de estrés y camino infeliz](#10-test-de-estrés-y-camino-infeliz)
-11. [Trabajo pendiente / próximos pasos](#11-trabajo-pendiente--próximos-pasos)
-12. [JSON del flujo de n8n](#12-json-del-flujo-de-n8n)
-13. [Video demo](#13-video-demo)
+3. [Entregable 1 — Mapa de arquitectura](#3-entregable-1--mapa-de-arquitectura)
+4. [Entregable 2 — Estructuras de datos documentadas](#4-entregable-2--estructuras-de-datos-documentadas)
+5. [Entregable 3 — Optimización de costos](#5-entregable-3--optimización-de-costos)
+6. [Entregable 4 — Seguridad y resiliencia](#6-entregable-4--seguridad-y-resiliencia)
+7. [Entregable 5 — Dashboard de control](#7-entregable-5--dashboard-de-control)
+8. [Test de estrés y camino infeliz](#8-test-de-estrés-y-camino-infeliz)
+9. [Trabajo Futuro / próximos pasos](#9-trabajo-futuro--próximos-pasos)
+10. [JSON del flujo de n8n](#10-json-del-flujo-de-n8n)
+11. [Video demo](#11-video-demo)
 
 ---
 
